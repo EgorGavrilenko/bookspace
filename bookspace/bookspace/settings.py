@@ -31,7 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'app1',
+    'library',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -52,13 +52,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-
 ROOT_URLCONF = 'bookspace.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [r'C:\Users\t\Desktop\bookspace\bookspace\app1\templates'],
+        'DIRS': [os.path.join(BASE_DIR,r'library\templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -132,9 +131,9 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 STATICFILES_DIRS = (
-    r'C:/Users/t/Desktop/bookspace/bookspace/app1/static',
+    os.path.join(BASE_DIR,r'library\static'),
 )
-STATIC_ROOT = "/bookspace/app1/static/"
+STATIC_ROOT = "/bookspace/library/static/"
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
