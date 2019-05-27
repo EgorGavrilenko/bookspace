@@ -9,5 +9,6 @@ urlpatterns = [
     path('api/editDescription', edit_description),
     path('api/assignBook', assign_book),
     path('api/getBooks', get_books),
-    path('', home)
+    path('', home),
+    path('admin/', admin.site.urls)
 ]
