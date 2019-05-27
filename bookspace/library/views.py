@@ -15,6 +15,7 @@ import urllib.parse as urlparse
 from .models import User, UserAndBook, Book
 
 
+# function for processing a request to add new user
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes((AllowAny,))
@@ -33,6 +34,7 @@ def add_user(request):
                         status=HTTP_400_BAD_REQUEST)
 
 
+# function for processing a request to add new book
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes((AllowAny,))
@@ -46,9 +48,14 @@ def add_book(request):
 
     book = Book(title=title, author=author)
     book.add_new_book()
-    return Response({"status": "success"}, status=HTTP_200_OK)
+    if book.add_new_book():
+        return Response(status=HTTP_200_OK)
+    else:
+        return Response({'error': 'Such name exists'},
+                        status=HTTP_400_BAD_REQUEST)
 
 
+# function for processing a request to assign book for user
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes((AllowAny,))
@@ -63,6 +70,7 @@ def assign_book(request):
         return Response({'error': 'Please provide both title and author'},
                         status=HTTP_400_BAD_REQUEST)
 
+
     userAndBook = UserAndBook(userDescription=description)
 
     if userAndBook.assign_book_for_user(title=title, author=author, name=name):
@@ -72,6 +80,7 @@ def assign_book(request):
                         status=HTTP_400_BAD_REQUEST)
 
 
+# function for processing a request to get list of user books in html page
 @csrf_exempt
 @api_view(["GET"])
 @renderer_classes((TemplateHTMLRenderer,))
@@ -85,15 +94,18 @@ def get_books(request):
     return Response(data, template_name='books.html')
 
 
+# function for processing a request to get list of users in html page
 @csrf_exempt
 @api_view(["GET"])
 @renderer_classes((TemplateHTMLRenderer,))
 @permission_classes((AllowAny,))
 def home(request):
     data = User.get_all_users()
+    print(data)
     return Response(data, template_name='users.html')
 
 
+# function for processing a request to edit book description
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes((AllowAny,))
@@ -108,6 +120,5 @@ def edit_description(request):
         return Response({'error': 'Please provide both title and author'},
                         status=HTTP_400_BAD_REQUEST)
 
-    UserAndBook.edit_description_of_book(title=title, author=author,
-                             name=name, description=description)
+    UserAndBook.edit_description_of_book(title=title, author=author, name=name, description=description)
     return Response({"status": "success"}, status=HTTP_200_OK)
