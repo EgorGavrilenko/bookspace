@@ -1,34 +1,56 @@
 .idea
 .vscode
+# Created by https://www.gitignore.io
 
+### OSX ###
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+
+### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*$py.class
 
 # C extensions
 *.so
 
 # Distribution / packaging
 .Python
+venv/
+env/
 build/
 develop-eggs/
 dist/
 downloads/
 eggs/
-.eggs/
 lib/
 lib64/
 parts/
 sdist/
 var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -43,39 +65,28 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
-.nox/
 .coverage
-.coverage.*
 .cache
 nosetests.xml
 coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
 
 # Translations
 *.mo
 *.pot
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-
-# Scrapy stuff:
-.scrapy
+# Sphinx documentation
+docs/_build/
 
 # PyBuilder
 target/
 
-# pyenv
-.python-version
 
-# Environments
+### Django ###
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+
 .env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+db.sqlite3
