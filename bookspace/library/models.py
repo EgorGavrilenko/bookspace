@@ -9,7 +9,7 @@ class Book(models.Model):
     author = models.CharField(max_length=50)
 
     def __str__(self):
-        return '{}: {}'.format(self.author, self.title)
+        return 'author: {} title: {}'.format(self.author, self.title)
 
     def add_new_book(self):
         try:
@@ -19,7 +19,22 @@ class Book(models.Model):
         except IntegrityError:
             return False
 
+    @staticmethod
+    def get_book_or_create(author, title):
+        try:
+            book = Book.objects.get(title=title, author=author)
+        except Book.DoesNotExist:
+            book = Book(title=title, author=author)
+            book.add_new_book()
+        return book
 
+    @staticmethod
+    def get_book(author, title):
+        try:
+            book = Book.objects.get(title=title, author=author)
+        except Book.DoesNotExist:
+            book = None
+        return book
 
 
 class User(models.Model):
@@ -45,21 +60,32 @@ class User(models.Model):
         users = User.objects.all()
         userslist = []
         for user in users:
-            userslist.append(user)
+            userslist.append(user.name)
         data = {'users': userslist}
         return data
+
+    @staticmethod
+    def get_user(name):
+        try:
+            user = User.objects.get(name=name)
+        except Book.DoesNotExist:
+            user = None
+        return user
+
 
 
 class UserAndBook(models.Model):
     class Meta:
         unique_together = (('userID', 'bookID'),)
+        verbose_name = "User and Book"
+        verbose_name_plural = "Users and Books"
 
     userID = models.ForeignKey(User, on_delete=models.PROTECT)
     bookID = models.ForeignKey(Book, on_delete=models.PROTECT)
     userDescription = models.TextField()
 
     def __str__(self):
-        return self.userDescription
+        return "User: {}; Book: {}; description: {}".format(self.userID, self.bookID, self.userDescription)
 
     @staticmethod
     def get_user_books(name):
@@ -79,11 +105,7 @@ class UserAndBook(models.Model):
             return None
 
     def assign_book_for_user(self, title, author, name):
-        try:
-            book = Book.objects.get(title=title, author=author)
-        except Book.DoesNotExist:
-            book = Book(title=title, author=author)
-            book.add_new_book()
+        book = Book.get_book_or_create(author=author, title=title)
         user = User.objects.get(name=name)
         try:
             self.userID = user
@@ -96,8 +118,8 @@ class UserAndBook(models.Model):
 
     @staticmethod
     def edit_description_of_book(name, author, title, description):
-        user = User.objects.get(name=name)
-        book = Book.objects.get(author=author, title=title)
+        user = User.get_user(name=name)
+        book = Book.get_book(author=author, title=title)
         userAndBook = UserAndBook.objects.get(userID=user, bookID=book)
         userAndBook.userDescription = description
         userAndBook.save()
