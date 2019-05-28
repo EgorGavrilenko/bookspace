@@ -80,7 +80,6 @@ var a = (function() {
         '&description=' +
         encodeURIComponent(description);
 
-      alert(body);
       xhr.open('POST', '/api/editDescription', true);
       xhr.responseType = 'document';
       xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
