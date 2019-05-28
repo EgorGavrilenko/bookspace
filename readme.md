@@ -20,6 +20,9 @@ sqlparse==0.3.0
 Для установки зависимостей выполните следующию команду
 <pre>pip3 install -r requirements.txt</pre>
 <h2>Начало работы</h2>
+Перед стартом выполните миграции
+<pre>python manage.py makemigrations library
+python manage.py migrate library</pre>
 Для запуска сервера выполните следующую команду
 <pre>python manage.py runserver</pre>
 вас встретит главная страница со всеми пользователями
