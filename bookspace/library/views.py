@@ -101,7 +101,6 @@ def get_books(request):
 @permission_classes((AllowAny,))
 def home(request):
     data = User.get_all_users()
-    print(data)
     return Response(data, template_name='users.html')
 
 
