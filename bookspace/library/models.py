@@ -42,6 +42,7 @@ class User(models.Model):
         unique_together = (('name'),)
 
     name = models.CharField(max_length=50)
+    image = models.ImageField(upload_to = 'user_image', default='media/default.png')
     books = models.ManyToManyField(Book, through="UserAndBook")
 
     def __str__(self):
@@ -56,13 +57,18 @@ class User(models.Model):
             return False
 
     @staticmethod
+    def delete_user(name):
+        try:
+            user = User.objects.get(name=name)
+        except Book.DoesNotExist:
+            return False
+        user.delete()
+        return True
+
+    @staticmethod
     def get_all_users():
         users = User.objects.all()
-        userslist = []
-        for user in users:
-            userslist.append(user.name)
-        data = {'users': userslist}
-        return data
+        return users
 
     @staticmethod
     def get_user(name):
@@ -94,7 +100,7 @@ class UserAndBook(models.Model):
             userBooks = UserAndBook.objects.filter(userID=user)
 
             userBooksDict = {}
-            userBooksDict["name"] = name
+            userBooksDict["user"] = user
             userBooksDict["books"] = []
             for userBook in userBooks:
                 userBooksDict["books"].append({"author": userBook.bookID.author, "title": userBook.bookID.title,

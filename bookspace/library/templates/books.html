@@ -4,6 +4,9 @@
     .div {
       margin: 50px;
     }
+    img {
+        border-radius: 35px;
+    }
     .trbook:hover {
       background-color: #f5f5f5;
     }
@@ -13,7 +16,7 @@
 
   <body>
     <div class="div">
-      <h1 class="display-4" id="name">{{ name }}</h1>
+      <h1 class="display-4" id="name"><img src="{{user.image.url}}" width="70" height="70">{{ user }}</h1>
       <table class="table">
         <thead class="thead-dark">
           <tr>

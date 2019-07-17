@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponseRedirect
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, renderer_classes
 from rest_framework.permissions import AllowAny
@@ -13,26 +14,29 @@ from rest_framework.renderers import TemplateHTMLRenderer
 import urllib.parse as urlparse
 
 from .models import User, UserAndBook, Book
-
+from .forms import UserForm
 
 # function for processing a request to add new user
 @csrf_exempt
-@api_view(["POST"])
+@api_view(["POST", "FILES"])
 @permission_classes((AllowAny,))
 def add_user(request):
-    name = request.data.get("name")
-    if name is None or not name:
-        return Response({'error': 'Please provide name'},
-                        status=HTTP_400_BAD_REQUEST)
+    form = UserForm(request.POST, request.FILES)
+    if form.is_valid():
+        form.save()
+        return HttpResponseRedirect('/')
 
-    user = User(name=name)
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def delete_user(request):
+    user = request.data.get("id")
 
-    if user.add_new_user():
-        return Response(status=HTTP_200_OK)
-    else:
-        return Response({'error': 'Such name exists'},
-                        status=HTTP_400_BAD_REQUEST)
+    if user is None or not user:
+        return Response(status=HTTP_400_BAD_REQUEST)
 
+    User.delete_user(user)
+    return HttpResponseRedirect('/')
 
 # function for processing a request to add new book
 @csrf_exempt
@@ -100,7 +104,9 @@ def get_books(request):
 @renderer_classes((TemplateHTMLRenderer,))
 @permission_classes((AllowAny,))
 def home(request):
-    data = User.get_all_users()
+    users = User.get_all_users()
+    form = UserForm()
+    data = {'users': users,'form': form}
     return Response(data, template_name='users.html')
 
 
