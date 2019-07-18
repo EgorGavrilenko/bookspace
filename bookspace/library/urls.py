@@ -3,7 +3,7 @@ from django.urls import path, re_path
 from django.conf import settings
 from django.conf.urls import url
 from django.views.static import serve
-from .views import add_user, add_book, assign_book, get_books, home, edit_description, delete_user
+from .views import add_user, add_book, assign_book, get_books, home, edit_description, delete_user, delete_book, edit_user
 
 
 urlpatterns = [
@@ -16,6 +16,9 @@ urlpatterns = [
     re_path('\d+/api/getBooks', get_books),
     path('api/delete', delete_user),
     re_path('\d+/api/delete', delete_user),
+    path('api/editUser', edit_user),
+    re_path('\d+/api/editUser', edit_user),
+    path('api/deleteBook', delete_book),
     path('<int:page_number>/', home),
     path('', home),
     path('admin/', admin.site.urls),

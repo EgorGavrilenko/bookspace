@@ -24,11 +24,11 @@ class Book(models.Model):
             return False
 
     @staticmethod
-    def get_book_or_create(author, title):
+    def get_book_or_create(author, title, number_of_pages, price):
         try:
-            book = Book.objects.get(title=title, author=author)
+            book = Book.objects.get(title=title, author=author, number_of_pages=number_of_pages, price=price)
         except Book.DoesNotExist:
-            book = Book(title=title, author=author)
+            book = Book(title=title, author=author, number_of_pages=number_of_pages, price=price)
             book.add_new_book()
         return book
 
@@ -66,6 +66,7 @@ class User(models.Model):
             user = User.objects.get(name=name)
         except Book.DoesNotExist:
             return False
+        user.books.clear()
         user.delete()
         return True
 
@@ -73,6 +74,12 @@ class User(models.Model):
     def get_all_users():
         users = User.objects.all()
         return users
+
+    @staticmethod
+    def edit_user_image(name, image):
+        user = User.objects.get(name=name)
+        user.image = image
+        user.save()
 
     @staticmethod
     def get_user(name):
@@ -151,3 +158,14 @@ class UserAndBook(models.Model):
         userAndBook.description = description
         userAndBook.data_of_change = datetime.date.today()
         userAndBook.save()
+
+    @staticmethod
+    def delete_user_and_book(name, author, title, price, number_of_pages):
+        try:
+            user = User.get_user(name=name)
+            book = Book.get_book(author=author, title=title, price=price, number_of_pages=number_of_pages)
+            userAndBook = UserAndBook.objects.get(userID=user, bookID=book)
+        except Book.DoesNotExist or User.DoesNotExist or UserAndBook.DoesNotExist:
+            return False
+        userAndBook.delete()
+        return True

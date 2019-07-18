@@ -1,42 +1,23 @@
 var a = (function() {
-  function addUser() {
-    addU(document.getElementById('newUserName').value).then(
-      result => {
-        location.reload();
-      },
-      err => {
-        alert('add error');
+
+  let name;
+  function set(e) {
+    let evt = e || window.event;
+    let current = evt.target || evt.srcElement;
+    let doc = current.parentNode.parentNode;
+    console.log(doc);
+    for (var i = 0; i < doc.childNodes.length; i++) {
+      if (doc.childNodes[i].id == 'name') {
+        name = doc.childNodes[i].textContent;
       }
-    );
-  }
-
-  function addU(name) {
-    return new Promise(function(resolve, reject) {
-      let xhr = new window.XMLHttpRequest();
-      let body = 'name=' + encodeURIComponent(name);
-      xhr.open('POST', '/api/addUser', true);
-      xhr.responseType = 'document';
-      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-      xhr.onload = function() {
-        if (this.status === 200) {
-          resolve(this.response);
-        } else {
-          var error = new Error(this.statusText);
-          error.code = this.status;
-          reject(error);
-        }
-      };
-      xhr.send(body);
-    });
-  }
-
-  function getBooks(id) {
-    let loc = window.location;
-    window.location = window.location + 'api/getBooks?name=' + id;
+    }
+    newImgUser = document.getElementById('newImgUser');
+    newImgUser.innerHTML = name;
+    newImgUser = document.getElementById('nameForEditImg');
+    newImgUser.value = name;
   }
 
   return {
-    addUser: addUser,
-    getBooks: getBooks,
+    set: set
   };
 })();

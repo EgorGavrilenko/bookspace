@@ -17,6 +17,7 @@ import urllib.parse as urlparse
 from .models import User, UserAndBook, Book
 from .forms import UserForm, BookForm
 
+
 # function for processing a request to add new user
 @csrf_exempt
 @api_view(["POST", "FILES"])
@@ -25,7 +26,17 @@ def add_user(request):
     form = UserForm(request.POST, request.FILES)
     if form.is_valid():
         form.save()
-        return HttpResponseRedirect('/')
+    return HttpResponseRedirect('/')
+
+@csrf_exempt
+@api_view(["POST", "FILES"])
+@permission_classes((AllowAny,))
+def edit_user(request):
+    name = request.data.get('name')
+    image = request.data.get('image')
+    User.edit_user_image(name=name, image=image)
+    return HttpResponseRedirect('/')
+
 
 @csrf_exempt
 @api_view(["POST"])
@@ -38,6 +49,7 @@ def delete_user(request):
 
     User.delete_user(user)
     return HttpResponseRedirect('/')
+
 
 # function for processing a request to add new book
 @csrf_exempt
@@ -74,7 +86,21 @@ def assign_book(request):
         userAndBook = UserAndBook(description=description)
         userAndBook.assign_book_for_user(book=book, name=name)
 
-        return HttpResponseRedirect('/api/getBooks?name='+name)
+        return HttpResponseRedirect('/api/getBooks?name=' + name)
+    elif form.is_bound:
+        title = request.data.get("title")
+        author = request.data.get("author")
+        name = request.data.get("name")
+        description = request.data.get("description")
+        price = request.data.get("price")
+        number_of_pages = request.data.get("number_of_pages")
+        book = Book.get_book(author=author, title=title, number_of_pages=number_of_pages, price=price)
+        userAndBook = UserAndBook(description=description)
+        userAndBook.assign_book_for_user(book=book, name=name)
+
+        return HttpResponseRedirect('/api/getBooks?name=' + name)
+    else:
+        return Response(status=HTTP_400_BAD_REQUEST)
 
 
 # function for processing a request to get list of user books in html page
@@ -88,7 +114,7 @@ def get_books(request):
         return Response({'error': 'Please provide name'},
                         status=HTTP_400_BAD_REQUEST)
     data = UserAndBook.get_user_books(name=name)
-    data['form'] = BookForm(initial = {'name': name})
+    data['form'] = BookForm(initial={'name': name})
     data['average_price'] = UserAndBook.average_price(name=name)
     return Response(data, template_name='books.html')
 
@@ -102,8 +128,23 @@ def home(request, page_number=1):
     users = User.get_all_users()
     form = UserForm()
     current_page = Paginator(users, 5)
-    data = {'users': current_page.page(page_number),'form': form}
+    data = {'users': current_page.page(page_number), 'form': form}
     return Response(data, template_name='users.html')
+
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def delete_book(request):
+    title = request.data.get("title")
+    author = request.data.get("author")
+    name = request.data.get("name")
+    price = request.data.get("price")
+    number_of_pages = request.data.get("number_of_pages")
+
+    UserAndBook.delete_user_and_book(title=title, author=author, name=name,
+                                     number_of_pages=number_of_pages, price=price)
+    return HttpResponseRedirect('/api/getBooks?name='+name)
 
 
 # function for processing a request to edit book description
@@ -118,7 +159,7 @@ def edit_description(request):
     price = request.data.get("price")
     number_of_pages = request.data.get("number_of_pages")
 
-    if title is None or author is None or name is None or description is None or\
+    if title is None or author is None or name is None or description is None or \
             not title or not author or not name or not description:
         return Response({'error': 'Please provide both title and author'},
                         status=HTTP_400_BAD_REQUEST)

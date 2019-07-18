@@ -1,103 +1,133 @@
 <!DOCTYPE html>
 <html>
-  <style>
+<style>
     .list {
-      margin: 50px;
+        margin: 50px;
     }
+
     .mBut {
         float: right;
+        margin: 5px;
     }
+
+    .leftimg {
+        float: left;
+    }
+
     img {
         border-radius: 25px;
     }
-    .liuser:hover {
-      background-color: #f5f5f5;
-    }
-  </style>
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" type="text/css" />
+</style>
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" type="text/css" />
 
-  <body>
+<body>
     <div class="list">
-      <ul class="list-group">
-        <li class="list-group-item active">Users</li>
-        {% if users %} {% for user in users %}
-        <li class="list-group-item liuser">
-            <img src="{{user.image.url}}" width="30" height="30">
-            {{ user.name }}
-            <button type="button" class="btn btn-info btn-sm pull-right mBut"
-                    onclick="window.location.href = window.location + 'api/getBooks?name=' + '{{user}}';">
-                Info
-            </button>
-            <form action="api/delete" method="post" class="mBut pull-right">
-                <input type="hidden" name="id" value="{{user}}"/>
-                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-            </form>
+        <ul class="list-group">
+            <li class="list-group-item active">Users</li>
+            {% if users %} {% for user in users %}
+            <li class="list-group-item">
+                <img src="{{user.image.url}}" width="40" height="40" class="leftimg">
+                <h3 id="name" class="pull-right">{{ user.name }}</h3>
 
-        </li>
+                <div class="btn-group mBut pull-right" role="group" aria-label="Basic example">
+                    <button type="button" class="btn btn-info " onclick="window.location.href = window.location + 'api/getBooks?name=' + '{{user}}';">
+                        Info
+                    </button>
+                    <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#newImg" onclick="a.set(event)">
+                        Edit
+                    </button>
+                    <form action="api/delete" method="post">
+                        <input type="hidden" name="id" value="{{user}}" />
+                        <button type="submit" class="btn btn-danger ">Delete</button>
+                    </form>
+                </div>
 
+            </li>
 
-        {% endfor %}
+            {% endfor %}
             <nav aria-label="Page navigation example">
-                  <ul class="pagination justify-content-center">
+                <ul class="pagination justify-content-center">
                     <li class="page-item {% if not users.has_previous %} disabled {% endif %}">
-                      <a class="page-link" href="{% if users.has_previous %}/{{ users.previous_page_number }}{% endif %}" tabindex="-1">Previous</a>
+                        <a class="page-link" href="{% if users.has_previous %}/{{ users.previous_page_number }}{% endif %}" tabindex="-1">Previous</a>
                     </li>
-                  {% for page in users.paginator.page_range %}
+                    {% for page in users.paginator.page_range %}
                     <li class="page-item {% if users.number == page %}active{% endif %}">
                         <a class="page-link" href="/{{page}}">{{ page }}</a>
                     </li>
-                  {% endfor %}
+                    {% endfor %}
                     <li class="page-item {% if not users.has_next %} disabled {% endif %}">
-                      <a class="page-link" href="{% if users.has_next %}/{{ users.next_page_number }}{% endif %}">Next</a>
+                        <a class="page-link" href="{% if users.has_next %}/{{ users.next_page_number }}{% endif %}">Next</a>
                     </li>
-                  </ul>
+                </ul>
             </nav>
-        {% else %}
+            {% else %}
 
-        <li class="list-group-item liuser">no users</li>
-        {% endif %}
-      </ul>
+            <li class="list-group-item liuser">no users</li>
+            {% endif %}
+        </ul>
 
-          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addUser">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addUser">
             add user
-          </button>
+        </button>
     </div>
 
     <div class="modal fade" id="addUser" tabindex="-1" role="dialog">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">New user</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form enctype="multipart/form-data" action="api/addUser" method="post">
-                {% csrf_token %}
-              <div class="form-group">
-                  {{ form.as_p }}
-              </div>
-              <input type="submit" value="add">
-            </form>
-          </div>
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">New user</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form enctype="multipart/form-data" action="api/addUser" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            {{ form.as_p }}
+                        </div>
+                        <input type="submit" value="add">
+                    </form>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
-    <script
-      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
-      integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
-      crossorigin="anonymous"
-    ></script>
+    <div class="modal fade" id="newImg" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit Image</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                        <div class="form-group">
+                            <h1 id="newImgUser"></h1>
+                            <form enctype="multipart/form-data" action="/api/editUser" method="post">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                <input type="hidden" id="nameForEditImg" name="name">
+                                <label for="image">New image:</label>
+                                <input type="file" name="image" id="image" accept="image/*">
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    edit
+                                </button>
+                            </form>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
 
     <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
-  </body>
+</body>
+
 </html>

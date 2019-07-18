@@ -55,8 +55,12 @@
                   </button>
               </td>
               <td>
-                  <form action="api/delete" method="post" >
-                      <input type="hidden" name="id" value="{{user}}"/>
+                  <form action="/api/deleteBook" method="post" >
+                      <input type="hidden" name="name" value="{{user}}"/>
+                      <input type="hidden" name="author" value="{{ book.author }}"/>
+                      <input type="hidden" name="title" value="{{book.title}}"/>
+                      <input type="hidden" name="number_of_pages" value="{{book.number_of_pages}}"/>
+                      <input type="hidden" name="price" value="{{book.price}}"/>
                       <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                   </form>
               </td>
