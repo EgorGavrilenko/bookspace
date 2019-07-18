@@ -2,6 +2,8 @@ var a = (function() {
   let author;
   let title;
   let description;
+  let price;
+  let number_of_pages;
   function addBook() {
     addB(
       document.getElementById('name').textContent,
@@ -78,7 +80,11 @@ var a = (function() {
         '&title=' +
         encodeURIComponent(title) +
         '&description=' +
-        encodeURIComponent(description);
+        encodeURIComponent(description)+
+        '&price=' +
+        encodeURIComponent(price)+
+        '&number_of_pages=' +
+        encodeURIComponent(number_of_pages);
 
       xhr.open('POST', '/api/editDescription', true);
       xhr.responseType = 'document';
@@ -99,7 +105,7 @@ var a = (function() {
   function set(e) {
     let evt = e || window.event;
     let current = evt.target || evt.srcElement;
-    let doc = current.parentNode;
+    let doc = current.parentNode.parentNode;
     for (var i = 0; i < doc.childNodes.length; i++) {
       if (doc.childNodes[i].id == 'author') {
         author = doc.childNodes[i].textContent;
@@ -109,6 +115,13 @@ var a = (function() {
       }
       if (doc.childNodes[i].id == 'description') {
         description = doc.childNodes[i].textContent;
+      }
+      if (doc.childNodes[i].id == 'number_of_pages') {
+        number_of_pages = parseInt(doc.childNodes[i].textContent);
+      }
+      if (doc.childNodes[i].id == 'price') {
+        console.log(doc.childNodes[i].textContent.replace('$',''))
+        price = parseInt(doc.childNodes[i].textContent.replace('$',''));
       }
     }
     newDescriptionAuthor = document.getElementById('newDescriptionAuthor');

@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponseRedirect
+from django.core.paginator import Paginator
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, renderer_classes
 from rest_framework.permissions import AllowAny
@@ -14,7 +15,7 @@ from rest_framework.renderers import TemplateHTMLRenderer
 import urllib.parse as urlparse
 
 from .models import User, UserAndBook, Book
-from .forms import UserForm
+from .forms import UserForm, BookForm
 
 # function for processing a request to add new user
 @csrf_exempt
@@ -64,24 +65,16 @@ def add_book(request):
 @api_view(["POST"])
 @permission_classes((AllowAny,))
 def assign_book(request):
-    title = request.data.get("title")
-    author = request.data.get("author")
-    name = request.data.get("name")
-    description = request.data.get("description")
+    form = BookForm(request.POST)
 
-    if title is None or author is None or name is None or description is None or not \
-            title or not author or not name or not description:
-        return Response({'error': 'Please provide both title and author'},
-                        status=HTTP_400_BAD_REQUEST)
+    if form.is_valid():
+        description = form.cleaned_data['description']
+        name = form.cleaned_data['name']
+        book = form.save()
+        userAndBook = UserAndBook(description=description)
+        userAndBook.assign_book_for_user(book=book, name=name)
 
-
-    userAndBook = UserAndBook(userDescription=description)
-
-    if userAndBook.assign_book_for_user(title=title, author=author, name=name):
-        return Response(status=HTTP_200_OK)
-    else:
-        return Response({'error': 'Such book exists'},
-                        status=HTTP_400_BAD_REQUEST)
+        return HttpResponseRedirect('/api/getBooks?name='+name)
 
 
 # function for processing a request to get list of user books in html page
@@ -94,7 +87,9 @@ def get_books(request):
     if name is None or not name:
         return Response({'error': 'Please provide name'},
                         status=HTTP_400_BAD_REQUEST)
-    data = UserAndBook.get_user_books(name)
+    data = UserAndBook.get_user_books(name=name)
+    data['form'] = BookForm(initial = {'name': name})
+    data['average_price'] = UserAndBook.average_price(name=name)
     return Response(data, template_name='books.html')
 
 
@@ -103,10 +98,11 @@ def get_books(request):
 @api_view(["GET"])
 @renderer_classes((TemplateHTMLRenderer,))
 @permission_classes((AllowAny,))
-def home(request):
+def home(request, page_number=1):
     users = User.get_all_users()
     form = UserForm()
-    data = {'users': users,'form': form}
+    current_page = Paginator(users, 5)
+    data = {'users': current_page.page(page_number),'form': form}
     return Response(data, template_name='users.html')
 
 
@@ -119,11 +115,14 @@ def edit_description(request):
     author = request.data.get("author")
     name = request.data.get("name")
     description = request.data.get("description")
+    price = request.data.get("price")
+    number_of_pages = request.data.get("number_of_pages")
 
     if title is None or author is None or name is None or description is None or\
             not title or not author or not name or not description:
         return Response({'error': 'Please provide both title and author'},
                         status=HTTP_400_BAD_REQUEST)
 
-    UserAndBook.edit_description_of_book(title=title, author=author, name=name, description=description)
+    UserAndBook.edit_description_of_book(title=title, author=author, name=name, description=description,
+                                         number_of_pages=number_of_pages, price=price)
     return Response({"status": "success"}, status=HTTP_200_OK)

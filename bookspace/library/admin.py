@@ -13,7 +13,7 @@ class BookAdmin(admin.ModelAdmin):
 
 
 class UserAndBookAdmin(admin.ModelAdmin):
-    list_display = ["userID", "bookID", "userDescription"]
+    list_display = ["userID", "bookID", "description"]
     list_filter = ["userID"]
 
     class Meta:

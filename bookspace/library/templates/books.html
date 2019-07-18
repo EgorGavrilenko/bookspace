@@ -7,9 +7,13 @@
     img {
         border-radius: 35px;
     }
-    .trbook:hover {
-      background-color: #f5f5f5;
+    .averagePrice {
+        float: right;
     }
+    .trbook:hover {
+        background-color: #f5f5f5;
+    }
+
   </style>
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" type="text/css" />
@@ -22,7 +26,13 @@
           <tr>
             <th scope="col">Author</th>
             <th scope="col">Title</th>
+            <th scope="col">Number of pages</th>
+            <th scope="col">Price</th>
             <th scope="col">Description</th>
+            <th scope="col">Data of creation</th>
+            <th scope="col">Data of change</th>
+              <th scope="col"></th>
+              <th scope="col"></th>
           </tr>
         </thead>
         <tbody>
@@ -31,15 +41,25 @@
             <td>no books</td>
           </tr>
           {% else %} {% for book in books %}
-          <tr
-            class="trbook"
-            data-toggle="modal"
-            data-target="#newDescription"
-            onclick="a.set(event)"
-          >
-            <td id="author">{{ book.author }}</td>
-            <td id="title">{{ book.title }}</td>
-            <td id="description">{{ book.description }}</td>
+          <tr>
+              <td id="author">{{ book.author }}</td>
+              <td id="title">{{ book.title }}</td>
+              <td id="number_of_pages">{{ book.number_of_pages }}</td>
+              <td id="price">{{ book.price }}$</td>
+              <td id="description">{{ book.description }}</td>
+              <td id="data_of_creation">{{ book.data_of_creation }}</td>
+              <td id="data_of_change">{{ book.data_of_change }}</td>
+              <td>
+                  <button data-toggle="modal" data-target="#newDescription" onclick="a.set(event)" class="btn btn-warning btn-sm">
+                      Edit
+                  </button>
+              </td>
+              <td>
+                  <form action="api/delete" method="post" >
+                      <input type="hidden" name="id" value="{{user}}"/>
+                      <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                  </form>
+              </td>
           </tr>
           {% endfor %} {% endif %}
         </tbody>
@@ -47,7 +67,12 @@
       <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#addBook">
         add book
       </button>
+        <div class="pull-right averagePrice">Average price: {{ average_price }}$</div>
     </div>
+
+
+
+
     <div class="modal fade" id="addBook" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -58,31 +83,12 @@
             </button>
           </div>
           <div class="modal-body">
-            <form>
+            <form action="/api/assignBook" method="post">
+                {% csrf_token %}
               <div class="form-group">
-                <label for="exampleInputEmail1">Author</label>
-                <input
-                  type="name"
-                  class="form-control"
-                  id="authorOfTheBookBeingAdded"
-                  placeholder="Author"
-                />
-                <label for="exampleInputEmail1">Title</label>
-                <input
-                  type="name"
-                  class="form-control"
-                  id="titleOfTheBookBeingAdded"
-                  placeholder="Title"
-                />
-                <label for="exampleInputEmail1">Description</label>
-                <input
-                  type="name"
-                  class="form-control"
-                  id="descriptionOfTheBookBeingAdded"
-                  placeholder="Description"
-                />
+                  {{ form.as_p }}
               </div>
-              <button type="button" class="btn btn-primary" onclick="a.addBook()">add</button>
+              <input type="submit" value="add">
             </form>
           </div>
         </div>
