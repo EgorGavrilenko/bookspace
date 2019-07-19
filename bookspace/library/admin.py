@@ -1,10 +1,9 @@
 from django.contrib import admin
-from django.contrib.auth.models import Group
 from .models import User, Book, UserAndBook
 
 
 class BookAdmin(admin.ModelAdmin):
-    list_display = ["author", "title"]
+    list_display = ["author", "title", "number_of_pages", "price"]
     list_filter = ["author",]
     search_fields = ["author", "title"]
 
@@ -13,7 +12,7 @@ class BookAdmin(admin.ModelAdmin):
 
 
 class UserAndBookAdmin(admin.ModelAdmin):
-    list_display = ["userID", "bookID", "description"]
+    list_display = ["userID", "bookID", "description", "data_of_creation", "data_of_change"]
     list_filter = ["userID"]
 
     class Meta:
@@ -21,7 +20,7 @@ class UserAndBookAdmin(admin.ModelAdmin):
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ["name"]
+    list_display = ["name", "image"]
     list_filter = ["name"]
     search_fields = ["name"]
 

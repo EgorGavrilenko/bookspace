@@ -13,7 +13,8 @@ class Book(models.Model):
     number_of_pages = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return 'author: {} title: {}'.format(self.author, self.title)
+        return 'author: {} title: {} number of pages: {}, price: {}$ '\
+            .format(self.author, self.title, self.number_of_pages, self.price)
 
     def add_new_book(self):
         try:
