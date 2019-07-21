@@ -73,6 +73,8 @@ class User(models.Model):
                 books = []
                 for userBook in userBooks:
                     books.append(userBook.bookID)
+                if not user.image.name == 'user_image/default.png':
+                    user.image.delete()
                 user.delete()
                 for book in books:
                     if not User.objects.filter(books=book).exists():
