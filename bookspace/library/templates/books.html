@@ -1,146 +1,155 @@
 <!DOCTYPE html>
 <html>
-  <style>
+<style>
     .div {
-      margin: 50px;
+        margin: 50px;
     }
+
     img {
         border-radius: 35px;
     }
+
     .averagePrice {
         float: right;
     }
-    .trbook:hover {
-        background-color: #f5f5f5;
-    }
+</style>
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" type="text/css" />
 
-  </style>
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" type="text/css" />
-
-  <body>
+<body>
     <div class="div">
-      <h1 class="display-4" id="name"><img src="{{user.image.url}}" width="70" height="70">{{ user }}</h1>
-      <table class="table">
-        <thead class="thead-dark">
-          <tr>
-            <th scope="col">Author</th>
-            <th scope="col">Title</th>
-            <th scope="col">Number of pages</th>
-            <th scope="col">Price</th>
-            <th scope="col">Description</th>
-            <th scope="col">Data of creation</th>
-            <th scope="col">Data of change</th>
-              <th scope="col"></th>
-              <th scope="col"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% if not books or books is None%}
-          <tr>
-            <td>no books</td>
-          </tr>
-          {% else %} {% for book in books %}
-          <tr>
-              <td id="author">{{ book.author }}</td>
-              <td id="title">{{ book.title }}</td>
-              <td id="number_of_pages">{{ book.number_of_pages }}</td>
-              <td id="price">{{ book.price }}$</td>
-              <td id="description">{{ book.description }}</td>
-              <td id="data_of_creation">{{ book.data_of_creation }}</td>
-              <td id="data_of_change">{{ book.data_of_change }}</td>
-              <td>
-                  <button data-toggle="modal" data-target="#newDescription" onclick="a.set(event)" class="btn btn-warning btn-sm">
-                      Edit
-                  </button>
-              </td>
-              <td>
-                  <form action="/api/deleteBook" method="post" >
-                      <input type="hidden" name="name" value="{{user}}"/>
-                      <input type="hidden" name="author" value="{{ book.author }}"/>
-                      <input type="hidden" name="title" value="{{book.title}}"/>
-                      <input type="hidden" name="number_of_pages" value="{{book.number_of_pages}}"/>
-                      <input type="hidden" name="price" value="{{book.price}}"/>
-                      <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                  </form>
-              </td>
-          </tr>
-          {% endfor %} {% endif %}
-        </tbody>
-      </table>
-      <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#addBook">
-        add book
-      </button>
+        <h1 class="display-4" id="name"><img src="{{user.image.url}}" width="70" height="70">{{ user }}</h1>
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Author</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Number of pages</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Data of creation</th>
+                    <th scope="col">Data of change</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if not books or books is None%}
+                <tr>
+                    <td>no books</td>
+                </tr>
+                {% else %} {% for book in books %}
+                <tr>
+                    <td id="author">{{ book.author }}</td>
+                    <td id="title">{{ book.title }}</td>
+                    <td id="number_of_pages">{{ book.number_of_pages }}</td>
+                    <td id="price">{{ book.price }}$</td>
+                    <td id="description">{{ book.description }}</td>
+                    <td id="data_of_creation">{{ book.data_of_creation }}</td>
+                    <td id="data_of_change">{{ book.data_of_change }}</td>
+                    <td>
+                        <button data-toggle="modal" data-target="#newDescription" onclick="a.set(event)" class="btn btn-warning btn-sm">
+                            Edit
+                        </button>
+                    </td>
+                    <td>
+                        <form action="/api/deleteBook" method="post">
+                            <input type="hidden" name="name" value="{{user}}" />
+                            <input type="hidden" name="author" value="{{ book.author }}" />
+                            <input type="hidden" name="title" value="{{book.title}}" />
+                            <input type="hidden" name="number_of_pages" value="{{book.number_of_pages}}" />
+                            <input type="hidden" name="price" value="{{book.price}}" />
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %} {% endif %}
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#addBook">
+            add book
+        </button>
         <div class="pull-right averagePrice">Average price: {{ average_price }}$</div>
     </div>
 
-
-
-
     <div class="modal fade" id="addBook" tabindex="-1" role="dialog">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">New book</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form action="/api/assignBook" method="post">
-                {% csrf_token %}
-              <div class="form-group">
-                  {{ form.as_p }}
-              </div>
-              <input type="submit" value="add">
-            </form>
-          </div>
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">New book</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/api/assignBook" method="post">
+                        <div class="form-group">
+                            {{ form.as_p }}
+                        </div>
+                        <input type="submit" value="add">
+                    </form>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
     <div class="modal fade" id="newDescription" tabindex="-1" role="dialog">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Edit description</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form>
-              <div class="form-group">
-                <label id="newDescriptionAuthor"></label>
-                <label id="newDescriptionTitle"></label>
-                <input
-                  type="name"
-                  class="form-control"
-                  id="textOfDescription"
-                  placeholder="Description"
-                />
-              </div>
-              <button type="button" class="btn btn-primary" onclick="a.editDescription()">
-                edit
-              </button>
-            </form>
-          </div>
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit description</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="/api/editDescription">
+                        <div class="form-group">
+                            <label id="newDescriptionAuthorLabel"></label>
+                            <label id="newDescriptionTitleLabel"></label>
+                            <input id="newDescriptionAuthor" type="hidden" name="author">
+                            <input id="newDescriptionTitle" type="hidden" name="title">
+                            <input id="newDescriptionNumberOfPages" type="hidden" name="number_of_pages">
+                            <input id="newDescriptionPrice" type="hidden" name="price">
+                            <input id="newDescriptionName" type="hidden" name="name" value="{{ user }}">
+                            <input type="text" id="textOfDescription" class="form-control" placeholder="Description" required name="description">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            edit
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
-    <script
-      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
-      integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
 
     <script type="text/javascript" src="{% static 'js/books.js' %}"></script>
-  </body>
+
+    {% if messages %}
+    <div id="errorModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Error</h4>
+                </div>
+                <div class="modal-body">{% for message in messages %} {{ message }} {% endfor %}</div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" type="button" data-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(window).on('load', function() {
+            $('#errorModal').modal('show');
+        });
+    </script>
+    {% endif %}
+
+</body>
+
 </html>

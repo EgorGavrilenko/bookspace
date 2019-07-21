@@ -1,11 +1,11 @@
 import datetime
-from django.db.models import Sum, Count
+from django.db.models import Avg
 from django.db import models, IntegrityError, transaction
 
 
 class Book(models.Model):
     class Meta:
-        unique_together = (('title', 'author', 'price','number_of_pages'),)
+        unique_together = (('title', 'author', 'price', 'number_of_pages'),)
 
     title = models.CharField(max_length=120)
     author = models.CharField(max_length=50)
@@ -13,7 +13,7 @@ class Book(models.Model):
     number_of_pages = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return 'author: {} title: {} number of pages: {}, price: {}$ '\
+        return 'author: {} title: {} number of pages: {}, price: {}$ ' \
             .format(self.author, self.title, self.number_of_pages, self.price)
 
     def add_new_book(self):
@@ -37,18 +37,18 @@ class Book(models.Model):
     def get_book(author, title, price, number_of_pages):
         try:
             book = Book.objects.get(title=title, author=author, price=price, number_of_pages=number_of_pages)
+            return book
         except Book.DoesNotExist:
-            book = None
-        return book
+            return None
 
 
 class User(models.Model):
     class Meta:
-        unique_together = (('name'),)
+        unique_together = ('name',)
 
     name = models.CharField(max_length=50)
-    image = models.ImageField(upload_to = 'user_image', default='media/default.png')
-    books = models.ManyToManyField(Book, null=True, blank=True, through="UserAndBook")
+    image = models.ImageField(upload_to='user_image', default='user_image/default.png')
+    books = models.ManyToManyField(Book, through="UserAndBook")
 
     def __str__(self):
         return self.name
@@ -65,11 +65,21 @@ class User(models.Model):
     def delete_user(name):
         try:
             user = User.objects.get(name=name)
-        except Book.DoesNotExist:
+        except User.DoesNotExist:
             return False
-        user.books.clear()
-        user.delete()
-        return True
+        try:
+            with transaction.atomic():
+                userBooks = UserAndBook.objects.filter(userID=user)
+                books = []
+                for userBook in userBooks:
+                    books.append(userBook.bookID)
+                user.delete()
+                for book in books:
+                    if not User.objects.filter(books=book).exists():
+                        book.delete()
+            return True
+        except IntegrityError:
+            return False
 
     @staticmethod
     def get_all_users():
@@ -78,18 +88,25 @@ class User(models.Model):
 
     @staticmethod
     def edit_user_image(name, image):
-        user = User.objects.get(name=name)
+        try:
+            user = User.objects.get(name=name)
+        except User.DoesNotExist:
+            return False
         user.image = image
-        user.save()
+        try:
+            with transaction.atomic():
+                user.save()
+            return True
+        except IntegrityError:
+            return False
 
     @staticmethod
     def get_user(name):
         try:
             user = User.objects.get(name=name)
+            return user
         except Book.DoesNotExist:
-            user = None
-        return user
-
+            return None
 
 
 class UserAndBook(models.Model):
@@ -98,8 +115,8 @@ class UserAndBook(models.Model):
         verbose_name = "User and Book"
         verbose_name_plural = "Users and Books"
 
-    userID = models.ForeignKey(User, on_delete=models.PROTECT)
-    bookID = models.ForeignKey(Book, on_delete=models.PROTECT)
+    userID = models.ForeignKey(User, on_delete=models.CASCADE)
+    bookID = models.ForeignKey(Book, on_delete=models.CASCADE)
     description = models.TextField(default="")
     data_of_creation = models.DateField(default=datetime.date.today)
     data_of_change = models.DateField(default=datetime.date.today)
@@ -109,29 +126,28 @@ class UserAndBook(models.Model):
 
     @staticmethod
     def get_user_books(name):
-        user = User.objects.get(name=name)
         try:
+            user = User.objects.get(name=name)
             userBooks = UserAndBook.objects.filter(userID=user)
-
-            userBooksDict = {}
-            userBooksDict["user"] = user
-            userBooksDict["books"] = []
-            for userBook in userBooks:
-                userBooksDict["books"].append({"author": userBook.bookID.author,
-                                               "title": userBook.bookID.title,
-                                               "number_of_pages": userBook.bookID.number_of_pages,
-                                               "price": userBook.bookID.price,
-                                               "description": userBook.description,
-                                               "data_of_creation": userBook.data_of_creation,
-                                               "data_of_change": userBook.data_of_change}
-                                              )
-
-            return userBooksDict
-        except UserAndBook.DoesNotExist:
+        except (UserAndBook.DoesNotExist, User.DoesNotExist):
             return None
 
+        userBooksDict = {"user": user, "books": []}
+        for userBook in userBooks:
+            userBooksDict["books"].append({"author": userBook.bookID.author,
+                                           "title": userBook.bookID.title,
+                                           "number_of_pages": userBook.bookID.number_of_pages,
+                                           "price": userBook.bookID.price,
+                                           "description": userBook.description,
+                                           "data_of_creation": userBook.data_of_creation,
+                                           "data_of_change": userBook.data_of_change})
+        return userBooksDict
+
     def assign_book_for_user(self, book, name):
-        user = User.objects.get(name=name)
+        try:
+            user = User.objects.get(name=name)
+        except User.DoesNotExist:
+            return False
         try:
             self.userID = user
             self.bookID = book
@@ -143,22 +159,31 @@ class UserAndBook(models.Model):
 
     @staticmethod
     def average_price(name):
-        user = User.objects.get(name=name)
-        countBook = User.objects.get(name=name).books.count()
-        sumPrice = User.objects.annotate(total=Sum('books__price')).get(name=name)
-        if countBook == 0:
+        try:
+            sumPrice = User.objects.annotate(total=Avg('books__price')).get(name=name)
+        except User.DoesNotExist:
+            return None
+        if sumPrice.total is None:
             return 0
         else:
-            return sumPrice.total/countBook
+            return sumPrice.total
 
     @staticmethod
     def edit_description_of_book(name, author, title, price, number_of_pages, description):
-        user = User.get_user(name=name)
-        book = Book.get_book(author=author, title=title, price=price, number_of_pages=number_of_pages)
-        userAndBook = UserAndBook.objects.get(userID=user, bookID=book)
+        try:
+            user = User.get_user(name=name)
+            book = Book.get_book(author=author, title=title, price=price, number_of_pages=number_of_pages)
+            userAndBook = UserAndBook.objects.get(userID=user, bookID=book)
+        except (Book.DoesNotExist, User.DoesNotExist, UserAndBook.DoesNotExist):
+            return False
         userAndBook.description = description
         userAndBook.data_of_change = datetime.date.today()
-        userAndBook.save()
+        try:
+            with transaction.atomic():
+                userAndBook.save()
+            return True
+        except IntegrityError:
+            return False
 
     @staticmethod
     def delete_user_and_book(name, author, title, price, number_of_pages):
@@ -166,7 +191,13 @@ class UserAndBook(models.Model):
             user = User.get_user(name=name)
             book = Book.get_book(author=author, title=title, price=price, number_of_pages=number_of_pages)
             userAndBook = UserAndBook.objects.get(userID=user, bookID=book)
-        except Book.DoesNotExist or User.DoesNotExist or UserAndBook.DoesNotExist:
+        except (Book.DoesNotExist, User.DoesNotExist, UserAndBook.DoesNotExist):
             return False
-        userAndBook.delete()
-        return True
+        try:
+            with transaction.atomic():
+                userAndBook.delete()
+                if not User.objects.filter(books=book).exists():
+                    book.delete()
+            return True
+        except IntegrityError:
+            return False
