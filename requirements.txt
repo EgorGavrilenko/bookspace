@@ -1,6 +1,6 @@
 Django==2.2.1
 django-rest-framework==0.1.0
-djangorestframework==3.9.3
+djangorestframework==3.11.2
 extras==1.0.0
 Pillow==6.1.0
 psycopg2==2.8.2
